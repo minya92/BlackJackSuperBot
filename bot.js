@@ -27,15 +27,20 @@ bot.on('text', function(msg)
 
     if (messageText === '/say') {
         sendMessageByBot(messageChatId, 'Hello World!');
+        return;
     }
 
     if (messageText === '/start') {
         sendMessageByBot(messageChatId, 'Привет, ' + firstName + '! Давай сыграем в блекджек?');
+        return;
     }
 
     if (messageText === '/stop') {
         sendMessageByBot(messageChatId, 'Пока, ' + firstName + '. Буду рад увидеть тебя еще раз...');
+        return;
     }
+
+    sendMessageByBot(messageChatId, 'Все говорят ' + messageText + ', а ты купи слона! xD');
 
     console.log(msg);
 });
