@@ -29,6 +29,10 @@ bot.on('text', function(msg)
         sendMessageByBot(messageChatId, 'Hello World!');
         return;
     }
+	
+	if (messageText === '/test') {
+        bot.sendSticker(messageChatId, 'cards/ca.jpg');
+    }
 
     if (messageText === '/start') {
         sendMessageByBot(messageChatId, 'Привет, ' + firstName + '! Давай сыграем в блекджек?');
