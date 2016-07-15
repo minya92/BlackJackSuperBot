@@ -6,8 +6,33 @@ var botOptions = {
     polling: true
 };
 
+var Utilites = {};
+
 var bot = new TelegramBot(token, botOptions);
 var aboutMe = null;
+
+var
+    CARDS_ARRAY = [
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        'J',
+        'Q',
+        'K',
+        'A',
+    ],
+    COLORS_ARRAY = [
+        '♥',
+        '♦',
+        '♣',
+        '♠',
+    ];
 
 bot.getMe().then(function(me)
 {
@@ -36,6 +61,12 @@ bot.on('text', function(msg)
 
     if (messageText === '/start') {
         sendMessageByBot(messageChatId, 'Привет, ' + firstName + '! Давай сыграем в блекджек?');
+        sendMessageByBot(messageChatId, 'Вот твоя карта ' + getNewCard() );
+        return;
+    }
+
+    if (messageText === 'еще') {
+        sendMessageByBot(messageChatId, 'держи ' + getNewCard() );
         return;
     }
 
@@ -53,3 +84,18 @@ function sendMessageByBot(aChatId, aMessage)
 {
     bot.sendMessage(aChatId, aMessage, { caption: 'I\'m a cute bot!' });
 }
+
+function getNewCard () {
+    var rndValue = Utilites.randomInteger(0,12);
+    var rndColor = Utilites.randomInteger(0,3);
+    return CARDS_ARRAY[rndValue] + COLORS_ARRAY[rndColor];
+};
+
+
+Utilites.randomInteger = function(min, max) {
+    var rand = min - 0.5 + Math.random() * (max - min + 1)
+    rand = Math.round(rand);
+    return rand;
+};
+
+
