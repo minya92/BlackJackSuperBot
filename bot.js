@@ -1,3 +1,5 @@
+var _ = require("underscore");
+
 var TelegramBot = require('node-telegram-bot-api');
 
 var token = '188599675:AAHDng9h7Cbi4AGkBweDrn0xHdIp8zUSy2M';
