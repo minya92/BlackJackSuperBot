@@ -1,6 +1,7 @@
 {
   "name": "BlackJackSuperBot",
   "dependencies": {
-    "node-telegram-bot-api": "^0.23.3"
+    "node-telegram-bot-api": "^0.23.3",
+    "underscore": "^1.8.3"
   }
 }
