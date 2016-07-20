@@ -15,43 +15,63 @@ var aboutMe = null;
 
 var session = [];
 
-var
-    CARDS_ARRAY = [
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-        'J',
-        'Q',
-        'K',
-        'A',
-    ],
-    CARDS_VALUES = {
-        '2' : 2,
-        '3' : 3,
-        '4' : 4,
-        '5' : 5,
-        '6' : 6,
-        '7' : 7,
-        '8' : 8,
-        '9' : 9,
-        '10' : 10,
-        'J' : 2,
-        'Q' : 3,
-        'K' : 4,
-        'A' : 11,
-    },
-    COLORS_ARRAY = [
-        '♥',
-        '♦',
-        '♣',
-        '♠',
-    ];
+var CARDS_ARRAY = [
+    {name: ' 2♥ ', value: 2},
+    {name: ' 3♥ ', value: 3},
+    {name: ' 4♥ ', value: 4},
+    {name: ' 5♥ ', value: 5},
+    {name: ' 6♥ ', value: 6},
+    {name: ' 7♥ ', value: 7},
+    {name: ' 8♥ ', value: 8},
+    {name: ' 9♥ ', value: 9},
+    {name: ' 10♥ ', value: 10},
+    {name: ' J♥ ', value: 2},
+    {name: ' Q♥ ', value: 3},
+    {name: ' K♥ ', value: 4},
+    {name: ' A♥ ', value: 11},
+
+    {name: ' 2♦ ', value: 2},
+    {name: ' 3♦ ', value: 3},
+    {name: ' 4♦ ', value: 4},
+    {name: ' 5♦ ', value: 5},
+    {name: ' 6♦ ', value: 6},
+    {name: ' 7♦ ', value: 7},
+    {name: ' 8♦ ', value: 8},
+    {name: ' 9♦ ', value: 9},
+    {name: ' 10♦ ', value: 10},
+    {name: ' J♦ ', value: 2},
+    {name: ' Q♦ ', value: 3},
+    {name: ' K♦ ', value: 4},
+    {name: ' A♦ ', value: 11},
+
+    {name: ' 2♠ ', value: 2},
+    {name: ' 3♠ ', value: 3},
+    {name: ' 4♠ ', value: 4},
+    {name: ' 5♠ ', value: 5},
+    {name: ' 6♠ ', value: 6},
+    {name: ' 7♠ ', value: 7},
+    {name: ' 8♠ ', value: 8},
+    {name: ' 9♠ ', value: 9},
+    {name: ' 10♠ ', value: 10},
+    {name: ' J♠ ', value: 2},
+    {name: ' Q♠ ', value: 3},
+    {name: ' K♠ ', value: 4},
+    {name: ' A♠ ', value: 11},
+
+    {name: ' 2♣ ', value: 2},
+    {name: ' 3♣ ', value: 3},
+    {name: ' 4♣ ', value: 4},
+    {name: ' 5♣ ', value: 5},
+    {name: ' 6♣ ', value: 6},
+    {name: ' 7♣ ', value: 7},
+    {name: ' 8♣ ', value: 8},
+    {name: ' 9♣ ', value: 9},
+    {name: ' 10♣ ', value: 10},
+    {name: ' J♣ ', value: 2},
+    {name: ' Q♣ ', value: 3},
+    {name: ' K♣ ', value: 4},
+    {name: ' A♣ ', value: 11}
+];
 
 bot.getMe().then(function(me)
 {
@@ -89,6 +109,7 @@ bot.on('text', function(msg)
     }
 
     if (messageText === '/run') {
+        session[messageChatId].cards = CARDS_ARRAY; //новая колода
         sendMessageByBot(messageChatId, 'Вот твои карты ' + getNewCard(messageChatId, 'pl') + ' ' + getNewCard(messageChatId, 'pl'));
         sendMessageByBot(messageChatId, 'Вот карты дилера' + getNewCard(messageChatId, 'dl') + ' ' + getNewCard(messageChatId, 'dl'));
         sendMessageByBot(messageChatId, 'Если нужно еще, напиши /еще');
@@ -122,24 +143,25 @@ function sendMessageByBot(aChatId, aMessage)
 }
 
 function getNewCard (chatId, who) {
-    var rndValue = Utilites.randomInteger(0,12);
-    var rndColor = Utilites.randomInteger(0,3);
-    if(chatId){
-        if(!session[chatId][who])
-            session[chatId][who] = [];
-        session[chatId][who].push(rndValue);
-    }
-    return CARDS_ARRAY[rndValue] + COLORS_ARRAY[rndColor];
+    var rndValue = Utilites.randomInteger(0, session[chatId].cards.length - 1);
+    var card = session[chatId].cards.splice(rndValue, 1)[0];
+    if(!session[chatId][who])
+        session[chatId][who] = [];
+    session[chatId][who].push(card);
+    return card.name;
 };
 
 function checkCards(chatId) {
     var dealerSum = 0, playerSum = 0;
     session[chatId].dl.forEach(function(card){
-        dealerSum = dealerSum + CARDS_VALUES[card];
+        dealerSum = dealerSum + card.value;
     });
     session[chatId].pl.forEach(function(card){
-        playerSum = playerSum + CARDS_VALUES[card];
+        playerSum = playerSum + card.value;
     });
+
+    session[chatId] = {}; // обнулить сессию
+
     if(playerSum > 21)
         return 'проиграл, у тебя ' + playerSum + ' очков';
     if(playerSum < 21 && playerSum > dealerSum)
