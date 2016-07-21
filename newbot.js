@@ -3,6 +3,9 @@
 const Telegram = require('telegram-node-bot')
 const TelegramBaseController = Telegram.TelegramBaseController
 const tg = new Telegram.Telegram('188599675:AAHDng9h7Cbi4AGkBweDrn0xHdIp8zUSy2M')
+const emoji = require('node-emoji').emoji;
+
+var chats = [];
 
 class Cards {
     constructor(){
@@ -90,6 +93,14 @@ class Cards {
         return dealer;
     }
 
+    calcPlayer(){
+        var player = 0;
+        this.player.forEach(function(card){
+            player = player + card.value;
+        });
+        return player;
+    }
+
     finish(){
         var dealer = 0;
         var player = 0;
@@ -112,14 +123,30 @@ class Cards {
 
 class StartController extends TelegramBaseController {
 
-    startHandler($) {
-        $.runMenu({
-            message: 'Когда будешь готов, нажми кнопку начать игру',
-            resizeKeyboard: true,
-            'Начать игру': function () {
-                new RunController().startHandler($);
-            }
-        })
+    startHandler($, slon, text) {
+        function menu(slon, text){
+            var msg = slon ? 'Все говорят "' + $._message.text + '", а ты купи слона! ' + emoji.laughing : "Выберите действие";
+            msg = text ? text : msg;
+            $.runMenu({
+                message: msg,
+                resizeKeyboard: true,
+                layout: [1, 2],
+                'Начать игру': function () {
+                    new RunController().startHandler($);
+                },
+                'Помощь': function () {
+                    menu(false, "Тут будут правила игры");
+                },
+                'Статистика': function () {
+                    menu(false, "Скоро сделаемс статистику");
+                },
+                'anyMatch': ($) => {
+                    //console.log(JSON.stringify($))
+                    new StartController().startHandler($, true);
+                }
+            })
+        }
+        menu(slon, text);
     }
 
     get routes() {
@@ -139,15 +166,27 @@ class RunController extends TelegramBaseController {
         cardsDealer.push(cards.getNewCard());
         cardsDealer.push(cards.getNewCard());
         $.sendMessage('Карты дилера: ' + cardsDealer.join(''));
+
         function menu(firstRun) {
             cardsPlayer.push(cards.getNewCard(true));
             if(!firstRun) {
                 if (cards.calcDealer() < 16) {
                     cardsDealer.push(cards.getNewCard());
                     $.sendMessage('Дилер взял: ' + cardsDealer.join(''));
+                    if(cards.calcDealer() > 21){
+                        $.sendMessage('Дилер перебрал, с кем не бывает! ' + emoji.sunglasses);
+                        new StartController().startHandler($, false, cards.finish());
+                        return;
+                    }
                 } else {
                     $.sendMessage('Дилер воздержался: ' + cardsDealer.join(''));
                 }
+            }
+            if(cards.calcPlayer() > 21){
+                $.sendMessage('Ваши карты: ' + cardsPlayer.join(''));
+                $.sendMessage('Это перебор, чувак! ' + emoji.weary);
+                new StartController().startHandler($, false, cards.finish());
+                return;
             }
             $.runMenu({
                 message: 'Ваши карты: ' + cardsPlayer.join(''),
@@ -160,8 +199,12 @@ class RunController extends TelegramBaseController {
                         cardsDealer.push(cards.getNewCard());
                         $.sendMessage('Дилер взял: ' + cardsDealer.join(''));
                     }
-                    $.sendMessage(cards.finish());
-                    new StartController().startHandler($);
+                    new StartController().startHandler($, false, cards.finish());
+                },
+                'anyMatch': ($) => {
+                    //console.log(JSON.stringify($))
+                    //$.sendMessage('Все говорят ' + $._message.text + ', а ты купи слона! ' + emoji.laughing);
+                    new StartController().startHandler($, true);
                 }
             })
         }
@@ -178,8 +221,10 @@ class RunController extends TelegramBaseController {
 
 class OtherwiseController extends TelegramBaseController {
     handle($) {
-        //$.sendMessage('Я не понимаю о чем ты ¯ \ _ (ツ) _ / ¯')
-        new StartController().startHandler($);
+        //console.log($._chatId, $._message.text);
+        //console.log(JSON.stringify($))
+        //.sendMessage('Все говорят ' + $._message.text + ', а ты купи слона! ' + emoji.laughing);
+        new StartController().startHandler($, true);
     }
 }
 
